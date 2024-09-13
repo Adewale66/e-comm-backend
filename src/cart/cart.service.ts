@@ -2,21 +2,25 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cart } from './entities/cart.entity';
+import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class CartService {
   constructor(
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
+    private readonly productService: ProductsService,
   ) {}
 
-  findOne(userId: string) {
-    return this.cartRepository.findOneBy({ userId });
+  async findOne(userId: string) {
+    return await this.getOrCreateCart(userId);
   }
 
   async addToCart(userId: string, productId: string) {
     const cart = await this.getOrCreateCart(userId);
+    const product = await this.productService.findOne(productId);
 
-    cart.products.push(productId);
+    if (!product) throw new NotFoundException('Product not found');
+    cart.products.push(product);
 
     await this.cartRepository.save(cart);
 
@@ -26,23 +30,24 @@ export class CartService {
   }
 
   async removeFromCart(userId: string, productId: string) {
-    const cart = await this.cartRepository.findOneBy({ userId });
+    const cart = await this.cartRepository.findOne({
+      where: {
+        userId,
+      },
+      relations: {
+        products: true,
+      },
+    });
 
     if (!cart) {
       throw new NotFoundException('Cart is empty.');
     }
 
-    const productIndex = cart.products.indexOf(productId);
-
-    if (productIndex === -1) {
-      if (cart.products.length === 0) {
-        await this.cartRepository.delete(userId);
-      }
-
-      throw new NotFoundException('Product not found in the cart');
+    if (!cart.products.some((product) => product.id == productId)) {
+      throw new NotFoundException('Product not found');
     }
 
-    cart.products.splice(productIndex, 1);
+    cart.products = cart.products.filter((product) => product.id !== productId);
 
     await this.cartRepository.save(cart);
 
@@ -58,7 +63,8 @@ export class CartService {
       throw new NotFoundException('Cart is already empty.');
     }
 
-    await this.cartRepository.delete(userId);
+    cart.products = [];
+    await this.cartRepository.save(cart);
 
     return {
       message: 'Cart has been cleared',
@@ -66,7 +72,14 @@ export class CartService {
   }
 
   private async getOrCreateCart(userId: string) {
-    let cart = await this.cartRepository.findOneBy({ userId });
+    let cart = await this.cartRepository.findOne({
+      where: {
+        userId,
+      },
+      relations: {
+        products: true,
+      },
+    });
 
     if (!cart) {
       cart = new Cart();

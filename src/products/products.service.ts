@@ -19,7 +19,7 @@ export class ProductsService {
       : this.productRepository.find();
   }
 
-  findOne(id: string) {
-    return this.productRepository.findOneBy({ id });
+  async findOne(id: string) {
+    return await this.productRepository.findOneBy({ id });
   }
 }

@@ -1,12 +1,20 @@
-import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity()
 export class Cart {
   @PrimaryColumn()
   userId: string;
 
-  @Column('simple-array')
-  products: string[];
+  @ManyToMany(() => Product)
+  @JoinTable()
+  products: Product[];
 
   @UpdateDateColumn({
     type: 'timestamp',
