@@ -2,12 +2,13 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ResponseService {
-  success(message: string, data?: any) {
-    return {
-      succeeded: true,
-      statusCode: HttpStatus.OK,
-      message,
-      data,
-    };
+  private status: HttpStatus;
+  private message: string;
+  private data?: object;
+
+  constructor(status: HttpStatus, message: string, data?: object) {
+    this.status = status;
+    this.message = message;
+    this.data = data;
   }
 }

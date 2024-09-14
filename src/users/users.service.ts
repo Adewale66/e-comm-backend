@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,7 +17,6 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly responseService: ResponseService,
   ) {}
   async create(registerDto: RegisterDto) {
     const user = new User();
@@ -26,9 +26,7 @@ export class UsersService {
     user.lastName = registerDto.lastName;
     await this.userRepository.save(user);
 
-    return {
-      message: 'User created successfully',
-    };
+    return new ResponseService(HttpStatus.CREATED, 'Registration successful');
   }
 
   async newPassword(updateInfo: LoginDto) {
@@ -40,12 +38,7 @@ export class UsersService {
     return await this.updatePassword(user, updateInfo.password);
   }
 
-  async changePassword(passwords: ChangePasswordDto) {
-    const user = await this.findOne(passwords.email);
-
-    if (!user)
-      throw new NotFoundException(`${passwords.email} is not a valid user`);
-
+  async changePassword(passwords: ChangePasswordDto, user: User) {
     const verifiedPassword = await argon2.verify(
       user.password,
       passwords.currentPassword,
@@ -54,6 +47,12 @@ export class UsersService {
     if (!verifiedPassword)
       throw new BadRequestException('Current password is incorrect');
 
+    const samePassword = await argon2.verify(
+      user.password,
+      passwords.newPassword,
+    );
+    if (samePassword)
+      throw new BadRequestException('Can not use the same password silly');
     return await this.updatePassword(user, passwords.newPassword);
   }
 
@@ -70,6 +69,6 @@ export class UsersService {
 
     await this.userRepository.save(user);
 
-    return this.responseService.success('Password changed successfully');
+    return new ResponseService(HttpStatus.OK, 'Password changed successfully');
   }
 }
