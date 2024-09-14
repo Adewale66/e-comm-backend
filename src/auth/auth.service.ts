@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -19,13 +20,13 @@ import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/password.dto';
 import { Otp } from './entities/otp.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly responseService: ResponseService,
     @InjectRepository(Otp) private readonly otpRepository: Repository<Otp>,
     @InjectQueue('reset email') private resetQueue: Queue,
   ) {}
@@ -62,11 +63,9 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
 
-    return this.responseService.success('Login successful', data);
+    return new ResponseService(HttpStatus.OK, 'Login successful', data);
   }
 
-  // user sends reset request -> send shortlived otp to email -> verify otp -> allow user to change password
-  // verify email exists
   async resetPassword(resetPassword: ResetPasswordDto) {
     const userExists = await this.usersService.findOne(resetPassword.email);
 
@@ -78,7 +77,7 @@ export class AuthService {
       specialChars: false,
     });
     const expiration = new Date();
-    expiration.setMinutes(expiration.getMinutes() + 1);
+    expiration.setMinutes(expiration.getMinutes() + 2);
     const otp = new Otp();
     otp.code = code;
     otp.expiresIn = expiration;
@@ -95,8 +94,7 @@ export class AuthService {
         removeOnComplete: true,
       },
     );
-
-    return this.responseService.success('Email sent');
+    return new ResponseService(HttpStatus.OK, 'Email sent');
   }
 
   async verifyOtp(otp: string) {
@@ -104,14 +102,20 @@ export class AuthService {
 
     if (!isValidOtp) throw new UnauthorizedException('Invalid OTP code');
 
-    return this.responseService.success('Otp verification successful');
+    const date = new Date();
+
+    if (isValidOtp.expiresIn < date) {
+      throw new BadRequestException('Invalid OTP code');
+    }
+
+    return new ResponseService(HttpStatus.OK, 'Otp verification successful');
   }
 
   newPassword(updateInfo: LoginDto) {
     return this.usersService.newPassword(updateInfo);
   }
 
-  changePassword(passwords: ChangePasswordDto) {
-    return this.usersService.changePassword(passwords);
+  changePassword(passwords: ChangePasswordDto, user: User) {
+    return this.usersService.changePassword(passwords, user);
   }
 }

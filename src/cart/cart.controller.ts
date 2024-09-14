@@ -2,10 +2,7 @@ import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { CartService } from './cart.service';
 import { UserData } from 'src/decorators';
-
-type CartPayload = {
-  productId: string;
-};
+import { CartPayloadDto } from './dto/cartpayload.dto';
 
 @Controller('cart')
 export class CartController {
@@ -17,12 +14,12 @@ export class CartController {
   }
 
   @Post('add')
-  addToCart(@UserData() user: User, @Body() payload: CartPayload) {
+  addToCart(@UserData() user: User, @Body() payload: CartPayloadDto) {
     return this.cartService.addToCart(user.id, payload.productId);
   }
 
   @Delete('remove')
-  removeFromCart(@UserData() user: User, @Body() payload: CartPayload) {
+  removeFromCart(@UserData() user: User, @Body() payload: CartPayloadDto) {
     return this.cartService.removeFromCart(user.id, payload.productId);
   }
 
