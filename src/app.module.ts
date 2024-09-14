@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { BullModule } from '@nestjs/bullmq';
+import { ResponseService } from './response.service';
 
 @Module({
   imports: [
@@ -34,5 +35,6 @@ import { BullModule } from '@nestjs/bullmq';
     ProductsModule,
     CartModule,
   ],
+  providers: [ResponseService],
 })
 export class AppModule {}

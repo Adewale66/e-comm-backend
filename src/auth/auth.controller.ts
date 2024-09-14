@@ -1,9 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { Public } from '../decorators';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/create-auth.dto';
 import { LoginDto } from './dto/login.dto';
-import { Public } from '../decorators';
 import { ResetPasswordDto } from './dto/password.dto';
+import { Otp } from './entities/otp.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,5 +27,23 @@ export class AuthController {
   @Post('forgot-password')
   resetPassword(@Body() resetPassword: ResetPasswordDto) {
     return this.authService.resetPassword(resetPassword);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  verifyOtp(@Body() otp: Pick<Otp, 'code'>) {
+    return this.authService.verifyOtp(otp.code);
+  }
+
+  @Public()
+  @Post('new-password')
+  newPassword(@Body() updateInfo: LoginDto) {
+    return this.authService.newPassword(updateInfo);
+  }
+
+  @Public()
+  @Post('change-password')
+  changePassword(@Body() passwords: ChangePasswordDto) {
+    return this.authService.changePassword(passwords);
   }
 }

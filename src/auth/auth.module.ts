@@ -10,6 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
 import { BullModule } from '@nestjs/bullmq';
 import { ResetConsumer } from './consumer';
+import { ResponseService } from 'src/response.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ResetConsumer } from './consumer';
   controllers: [AuthController],
   providers: [
     AuthService,
+    ResponseService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
