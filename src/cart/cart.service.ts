@@ -149,11 +149,13 @@ export class CartService {
   }
 
   private computeTotalPrice(cart: Cart) {
-    const newCartTotal = cart.products.reduce(
+    const cartTotal = cart.products.reduce(
       (sum, product) => sum + product.quantity * product.product.price,
       0,
     );
 
-    return parseFloat(newCartTotal.toFixed(2));
+    const fixedDecimalTotal = parseFloat(cartTotal.toFixed(2));
+
+    return Math.round(fixedDecimalTotal);
   }
 }
