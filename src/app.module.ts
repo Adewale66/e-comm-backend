@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { BullModule } from '@nestjs/bullmq';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BullModule } from '@nestjs/bullmq';
     UsersModule,
     ProductsModule,
     CartModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}

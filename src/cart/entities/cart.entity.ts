@@ -1,20 +1,23 @@
 import {
+  Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Product } from '../../products/entities/product.entity';
+// import { Product } from '../../products/entities/product.entity';
+import { CartItem } from './cart-item.entity';
 
 @Entity()
 export class Cart {
   @PrimaryColumn()
   userId: string;
 
-  @ManyToMany(() => Product)
-  @JoinTable()
-  products: Product[];
+  @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })
+  products: CartItem[];
+
+  @Column('decimal')
+  total: number;
 
   @UpdateDateColumn({
     type: 'timestamp',

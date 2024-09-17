@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SeederService } from './products/seeder.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const seeder = app.get(SeederService);
   await seeder.seed();
   app.useGlobalPipes(new ValidationPipe());

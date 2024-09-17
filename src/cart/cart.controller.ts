@@ -15,7 +15,7 @@ export class CartController {
 
   @Post('add')
   addToCart(@UserData() user: User, @Body() payload: CartPayloadDto) {
-    return this.cartService.addToCart(user.id, payload.productId);
+    return this.cartService.addToCart(user.id, payload);
   }
 
   @Delete('remove')
