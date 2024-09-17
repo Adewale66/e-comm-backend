@@ -33,6 +33,8 @@ export class PaymentService {
 
     const BASE_URL = this.configService.get<string>('BASE_URL');
 
+    // pass customer here
+
     const lineItems = cart.products.map((product) => ({
       price_data: {
         currency: 'ngn',
@@ -83,6 +85,7 @@ export class PaymentService {
       return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
     }
 
+    // put in a queue
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object;
@@ -129,7 +132,7 @@ export class PaymentService {
     } catch (error) {
       return new ResponseService(
         HttpStatus.INTERNAL_SERVER_ERROR,
-        'An error occurred during payment verification',
+        'An error occurred ',
         error,
       );
     }

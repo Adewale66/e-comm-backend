@@ -5,7 +5,6 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-// import { Product } from '../../products/entities/product.entity';
 import { CartItem } from './cart-item.entity';
 
 @Entity()
