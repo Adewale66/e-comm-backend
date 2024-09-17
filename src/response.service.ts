@@ -11,4 +11,8 @@ export class ResponseService {
     this.message = message;
     this.data = data;
   }
+
+  getStatus(): number {
+    return this.status;
+  }
 }
