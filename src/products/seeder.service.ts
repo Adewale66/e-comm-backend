@@ -30,6 +30,7 @@ export class SeederService {
         await this.productRepository.save({
           ...data,
           price: parseFloat(data.price),
+          tag: data.title.split(' ').join('-').toLowerCase(),
         });
       }
     } catch (err) {
