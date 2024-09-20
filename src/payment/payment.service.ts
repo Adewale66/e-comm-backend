@@ -137,4 +137,8 @@ export class PaymentService {
       );
     }
   }
+
+  async getOrders(user: User) {
+    return await this.orderUtil.findAll(user.id);
+  }
 }

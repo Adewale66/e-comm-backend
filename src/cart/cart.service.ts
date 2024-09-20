@@ -1,4 +1,9 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductsService } from '../products/products.service';
@@ -19,13 +24,13 @@ export class CartService {
     return await this.getOrCreateCart(userId);
   }
 
-  async addToCart(userId: string, cartpayload: CartPayloadDto) {
+  async addToCart(userId: string, cartPayload: CartPayloadDto) {
     const cart = await this.getOrCreateCart(userId);
-    const product = await this.productService.findOne(cartpayload.productId);
+    const product = await this.productService.findOne(cartPayload.productId);
 
     if (!product) throw new NotFoundException('Product not found');
 
-    const updatedCart = this.handleCartUpdate(cart, cartpayload, product);
+    const updatedCart = this.handleCartUpdate(cart, cartPayload, product);
 
     await this.cartRepository.save(updatedCart);
 
@@ -35,6 +40,30 @@ export class CartService {
     const { userId: id, updated_at, ...data } = newCartData;
 
     return new ResponseService(HttpStatus.CREATED, 'Added to cart', data);
+  }
+
+  async reduceItemQuantity(userId: string, cartPayload: CartPayloadDto) {
+    const cart = await this.getOrCreateCart(userId);
+    const product = await this.productService.findOne(cartPayload.productId);
+
+    if (!product) throw new NotFoundException('Product not found');
+
+    const productInCart = cart.products.find(
+      (item) => item.product.id === cartPayload.productId,
+    );
+
+    const newQuantity = productInCart.quantity - 1;
+
+    if (newQuantity === 0)
+      throw new BadRequestException('Quantity must be greater than zero');
+
+    productInCart.quantity = newQuantity;
+
+    cart.total = this.computeTotalPrice(cart);
+
+    await this.cartRepository.save(cart);
+
+    return new ResponseService(HttpStatus.OK, `Item quanity reduced`);
   }
 
   async removeFromCart(userId: string, productId: string) {
@@ -81,7 +110,7 @@ export class CartService {
   async emptyCart(userId: string) {
     const cart = await this.getOrCreateCart(userId);
 
-    if (!cart) {
+    if (cart.products.length === 0) {
       throw new NotFoundException('Cart is already empty.');
     }
 
@@ -124,20 +153,20 @@ export class CartService {
 
   private handleCartUpdate(
     cart: Cart,
-    cartpayload: CartPayloadDto,
+    cartPayload: CartPayloadDto,
     product: Product,
   ) {
     const productInCart = cart.products.find(
-      (item) => item.product.id === cartpayload.productId,
+      (item) => item.product.id === cartPayload.productId,
     );
 
     if (productInCart) {
-      productInCart.quantity = cartpayload.quantity;
+      productInCart.quantity += 1;
     } else {
       const cartItem = new CartItem();
 
       cartItem.cart = cart;
-      cartItem.quantity = cartpayload.quantity;
+      cartItem.quantity = 1;
       cartItem.product = product;
 
       cart.products.push(cartItem);

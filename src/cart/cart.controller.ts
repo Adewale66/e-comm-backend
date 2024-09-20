@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { CartService } from './cart.service';
 import { UserData } from 'src/decorators';
@@ -14,8 +14,16 @@ export class CartController {
   }
 
   @Post('add')
-  addToCart(@UserData() user: User, @Body() payload: CartPayloadDto) {
-    return this.cartService.addToCart(user.id, payload);
+  addToCart(@UserData() user: User, @Body() cartPayload: CartPayloadDto) {
+    return this.cartService.addToCart(user.id, cartPayload);
+  }
+
+  @Patch('subtract')
+  reduceItemQuantity(
+    @UserData() user: User,
+    @Body() cartPayload: CartPayloadDto,
+  ) {
+    return this.cartService.reduceItemQuantity(user.id, cartPayload);
   }
 
   @Delete('remove')

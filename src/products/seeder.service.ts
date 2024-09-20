@@ -29,7 +29,7 @@ export class SeederService {
       for (const data of seedData) {
         await this.productRepository.save({
           ...data,
-          price: parseFloat(data.price),
+          price: parseFloat(data.price) * 100,
         });
       }
     } catch (err) {
