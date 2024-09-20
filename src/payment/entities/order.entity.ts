@@ -1,34 +1,33 @@
-import { Order } from 'src/payment/entities/order.entity';
+import { CartItem } from 'src/cart/entities/cart-item.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: false })
-  firstName: string;
-
-  @Column({ nullable: false })
-  lastName: string;
-
-  @Column({ unique: true, nullable: false })
-  @Index()
-  email: string;
+  @Column()
+  order_number: string;
 
   @Column()
-  password: string;
+  status: string;
 
-  @OneToMany(() => Order, (order) => order.user, { cascade: true })
-  orders: Order[];
+  @ManyToOne(() => User, (user) => user.orders, { eager: true })
+  user: User;
+
+  @ManyToMany(() => CartItem, (item) => item.product, { cascade: true })
+  @JoinTable()
+  products: CartItem[];
 
   @CreateDateColumn({
     type: 'timestamp',

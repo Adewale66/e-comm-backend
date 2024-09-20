@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import {
   HttpStatus,
   Injectable,
@@ -6,20 +7,25 @@ import {
   RawBodyRequest,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Queue } from 'bullmq';
 import { Request, Response } from 'express';
 import { CartService } from 'src/cart/cart.service';
 import { ResponseService } from 'src/response.service';
+import { User } from 'src/users/entities/user.entity';
 import Stripe from 'stripe';
+import { CustomerUtil } from './utils/customer-util';
+import { OrderUtil } from './utils/order-utils';
 
 @Injectable()
 export class PaymentService {
   private readonly stripe: Stripe;
 
-  // COMPARE .ENV DETAILS WITH PARTNER
-
   constructor(
     private readonly cartService: CartService,
     private readonly configService: ConfigService,
+    private readonly customerUtil: CustomerUtil,
+    private readonly orderUtil: OrderUtil,
+    @InjectQueue('payment made') private paymentQueue: Queue,
   ) {
     const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
@@ -28,10 +34,14 @@ export class PaymentService {
     });
   }
 
-  async checkOut(userId: string) {
-    const cart = await this.cartService.findOne(userId);
-
+  async checkOut(user: User) {
+    const cart = await this.cartService.findOne(user.id);
     const BASE_URL = this.configService.get<string>('BASE_URL');
+    const customer = await this.customerUtil.getOrCreateCustomer(
+      this.stripe,
+      user,
+    );
+    const order = await this.orderUtil.generateOrder(user, cart);
 
     const lineItems = cart.products.map((product) => ({
       price_data: {
@@ -44,16 +54,19 @@ export class PaymentService {
       },
       quantity: product.quantity,
     }));
-
     try {
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: lineItems,
+        customer: customer.id,
+        metadata: {
+          order_id: order.id,
+          user_id: user.id,
+        },
         mode: 'payment',
         success_url: `${BASE_URL}/success`,
         cancel_url: `${BASE_URL}/cancel`,
       });
-
       return new ResponseService(
         HttpStatus.CREATED,
         'Payment session created successfully',
@@ -83,24 +96,14 @@ export class PaymentService {
       return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
     }
 
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object;
-
-        const paymentStatus = await this.verifyStatus(session.id);
-
-        if (paymentStatus.getStatus() === 200)
-          // Handle successful payment event.
-
-          break;
-      case 'payment_intent.payment_failed':
-        // const charge = event.data.object;
-
-        break;
-      default:
-        console.log('Unhandled event type: ', event.type);
-        break;
-    }
+    await this.paymentQueue.add(
+      'payment',
+      { event },
+      {
+        attempts: 3,
+        removeOnComplete: true,
+      },
+    );
 
     return res.sendStatus(200);
   }

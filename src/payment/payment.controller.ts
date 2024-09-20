@@ -19,7 +19,7 @@ export class PaymentController {
   @Post('stripe/checkout')
   checkOut(@UserData() user: User) {
     try {
-      return this.paymentService.checkOut(user.id);
+      return this.paymentService.checkOut(user);
     } catch (error) {
       throw new Error(error);
     }
