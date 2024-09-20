@@ -61,6 +61,8 @@ export class AuthService {
 
     const data = {
       access_token: await this.jwtService.signAsync(payload),
+      name: user.firstName + ' ' + user.lastName,
+      email: user.email,
     };
 
     return new ResponseService(HttpStatus.OK, 'Login successful', data);

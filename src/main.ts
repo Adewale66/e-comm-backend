@@ -9,6 +9,7 @@ async function bootstrap() {
   await seeder.seed();
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
+  app.enableCors()
   await app.listen(process.env.PORT || 8080);
 }
 bootstrap();

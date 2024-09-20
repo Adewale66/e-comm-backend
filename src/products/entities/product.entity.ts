@@ -19,4 +19,7 @@ export class Product {
 
   @Column()
   image: string;
+
+  @Column()
+  tag: string;
 }

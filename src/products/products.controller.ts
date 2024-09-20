@@ -8,13 +8,13 @@ export class ProductsController {
 
   @Get()
   @Public()
-  findAll(@Query('category') category: string) {
-    return this.productsService.findAll(category);
+  findAll(@Query('category') category: string, @Query('page') page: string) {
+    return this.productsService.findAll(category, page);
   }
 
-  @Get(':id')
+  @Get(':tag')
   @Public()
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  findOne(@Param('tag') tag: string) {
+    return this.productsService.findOne(tag);
   }
 }
