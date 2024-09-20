@@ -13,6 +13,6 @@ export class CartItem {
   @ManyToOne(() => Product)
   product: Product;
 
-  @Column()
+  @Column({ type: 'int', unsigned: true })
   quantity: number;
 }

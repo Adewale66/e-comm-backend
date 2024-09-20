@@ -1,4 +1,5 @@
 import {
+  Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,11 +9,14 @@ import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Order } from '../entities/order.entity';
+import { CartService } from '../../cart/cart.service';
 
+@Injectable()
 export class OrderUtil {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+    private readonly cartService: CartService,
   ) {}
 
   private async generateOrderNumber() {
@@ -65,6 +69,10 @@ export class OrderUtil {
       },
       relations: ['products', 'products.product'],
     });
+  }
+
+  async clearCart(userId: string) {
+    await this.cartService.emptyCart(userId);
   }
 
   async setOrderStatus(orderId: string, status: string) {

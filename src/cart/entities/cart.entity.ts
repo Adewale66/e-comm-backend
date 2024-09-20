@@ -5,7 +5,6 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-// import { Product } from '../../products/entities/product.entity';
 import { CartItem } from './cart-item.entity';
 
 @Entity()
@@ -16,7 +15,11 @@ export class Cart {
   @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })
   products: CartItem[];
 
-  @Column('decimal')
+  @Column('decimal', {
+    default: 0.0,
+    precision: 5,
+    scale: 2,
+  })
   total: number;
 
   @UpdateDateColumn({

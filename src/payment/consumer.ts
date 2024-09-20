@@ -38,10 +38,6 @@ export class PaymentConsumer extends WorkerHost {
     const event = job.data.event as Stripe.Event;
 
     switch (event.type) {
-      case 'charge.succeeded':
-        // const charge = event.data.object;
-
-        break;
       case 'checkout.session.completed':
         const session = event.data.object;
 
@@ -51,6 +47,7 @@ export class PaymentConsumer extends WorkerHost {
           const metaData = session.metadata;
 
           const orderId = metaData.order_id;
+          const user = metaData.user_id;
           await this.orderUtil.setOrderStatus(orderId, 'PAID');
 
           const order = await this.orderUtil.findOne(orderId);
@@ -64,11 +61,15 @@ export class PaymentConsumer extends WorkerHost {
           };
 
           this.sendEmail(customerData);
+          await this.orderUtil.clearCart(user);
         }
 
         break;
-      case 'payment_intent.succeeded':
-        // const charge = event.data.object;
+
+      case 'payment_intent.payment_failed':
+        const paymentFailed = event.data.object;
+        const failedOrderId = paymentFailed.metadata.order_id;
+        await this.orderUtil.setOrderStatus(failedOrderId, 'FAILED');
 
         break;
       default:

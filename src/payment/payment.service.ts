@@ -1,8 +1,10 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import {
+  BadRequestException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   RawBodyRequest,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ import { User } from 'src/users/entities/user.entity';
 import Stripe from 'stripe';
 import { CustomerUtil } from './utils/customer-util';
 import { OrderUtil } from './utils/order-utils';
+import { PaymentRequiredException } from '../exceptions/PaymentRequired';
 
 @Injectable()
 export class PaymentService {
@@ -35,7 +38,15 @@ export class PaymentService {
   }
 
   async checkOut(user: User) {
-    const cart = await this.cartService.findOne(user.id);
+    const cart = await this.cartService.find(user.id);
+
+    if (!cart) throw new NotFoundException('Cart not found');
+
+    if (!cart.products.length)
+      throw new BadRequestException(
+        'Cart is empty. Add items to cart to checkout',
+      );
+
     const BASE_URL = this.configService.get<string>('BASE_URL');
     const customer = await this.customerUtil.getOrCreateCustomer(
       this.stripe,
@@ -45,10 +56,9 @@ export class PaymentService {
 
     const lineItems = cart.products.map((product) => ({
       price_data: {
-        currency: 'ngn',
+        currency: 'usd',
         product_data: {
           name: product.product.title,
-          description: product.product.description,
         },
         unit_amount: product.product.price * 100,
       },
@@ -56,7 +66,6 @@ export class PaymentService {
     }));
     try {
       const session = await this.stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
         line_items: lineItems,
         customer: customer.id,
         metadata: {
@@ -64,18 +73,24 @@ export class PaymentService {
           user_id: user.id,
         },
         mode: 'payment',
-        success_url: `${BASE_URL}/success`,
-        cancel_url: `${BASE_URL}/cancel`,
+        success_url: `${BASE_URL}/payment?session_id={CHECKOUT_SESSION_ID}&type=sucess`,
+        cancel_url: `${BASE_URL}/payment?session_id={CHECKOUT_SESSION_ID}&type=cancel`,
+        payment_intent_data: {
+          metadata: {
+            order_id: order.id,
+            user_id: user.id,
+          },
+        },
       });
       return new ResponseService(
         HttpStatus.CREATED,
         'Payment session created successfully',
-        { sessionId: session.id, paymentURL: session.url },
+        { paymentURL: session.url },
       );
     } catch (error) {
+      Logger.error(error);
       throw new InternalServerErrorException(
-        'Failed to create payment session',
-        error.message,
+        'Internal server error, please try again later',
       );
     }
   }
@@ -121,19 +136,15 @@ export class PaymentService {
           return new ResponseService(HttpStatus.OK, 'Payment successful');
 
         case 'unpaid':
-          return new ResponseService(
-            HttpStatus.PAYMENT_REQUIRED,
-            'Payment is required',
-          );
+          throw new PaymentRequiredException();
 
         default:
-          return new ResponseService(HttpStatus.BAD_REQUEST, 'Payment failed');
+          throw new BadRequestException('Payment status unknown');
       }
     } catch (error) {
-      return new ResponseService(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'An error occurred during payment verification',
-        error,
+      Logger.error(error);
+      throw new InternalServerErrorException(
+        'Internal server error, please try again later',
       );
     }
   }

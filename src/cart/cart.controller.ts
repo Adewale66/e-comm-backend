@@ -1,8 +1,19 @@
-import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { CartService } from './cart.service';
 import { UserData } from 'src/decorators';
 import { CartPayloadDto } from './dto/cartpayload.dto';
+import { QuantityPayloadDto } from './dto/quantityPayload.dto';
 
 @Controller('cart')
 export class CartController {
@@ -13,25 +24,32 @@ export class CartController {
     return this.cartService.findOne(user.id);
   }
 
-  @Post('add')
+  @Post('items')
   addToCart(@UserData() user: User, @Body() cartPayload: CartPayloadDto) {
     return this.cartService.addToCart(user.id, cartPayload);
   }
 
-  @Patch('subtract')
-  reduceItemQuantity(
+  @Patch('items/:id')
+  updateQuantity(
     @UserData() user: User,
-    @Body() cartPayload: CartPayloadDto,
+    @Param('id') productId: string,
+    @Body() cartPayload: QuantityPayloadDto,
   ) {
-    return this.cartService.reduceItemQuantity(user.id, cartPayload);
+    return this.cartService.updateQuantity(
+      user.id,
+      cartPayload.quantity,
+      productId,
+    );
   }
 
-  @Delete('remove')
-  removeFromCart(@UserData() user: User, @Body() payload: CartPayloadDto) {
-    return this.cartService.removeFromCart(user.id, payload.productId);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('items/:id')
+  removeFromCart(@UserData() user: User, @Param('id') productId: string) {
+    return this.cartService.removeFromCart(user.id, productId);
   }
 
-  @Delete('clear')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('items')
   emptyCart(@UserData() user: User) {
     return this.cartService.emptyCart(user.id);
   }

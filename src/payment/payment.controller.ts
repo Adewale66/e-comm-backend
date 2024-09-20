@@ -26,7 +26,7 @@ export class PaymentController {
   }
 
   @Public()
-  @Post('webhook')
+  @Post('payment/webhook')
   handleWebhook(@Req() req: RawBodyRequest<Request>, @Res() res: Response) {
     return this.paymentService.handleWebhook(req, res);
   }
