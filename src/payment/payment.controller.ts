@@ -12,11 +12,11 @@ import { User } from 'src/users/entities/user.entity';
 import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
 
-@Controller('payment')
+@Controller()
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post('stripe/checkout')
+  @Post('payment/stripe/checkout')
   checkOut(@UserData() user: User) {
     try {
       return this.paymentService.checkOut(user);
@@ -31,8 +31,13 @@ export class PaymentController {
     return this.paymentService.handleWebhook(req, res);
   }
 
-  @Get('stripe/status')
+  @Get('payment/stripe/status')
   verifyStatus(@Query('session_id') sessionId: string) {
     return this.paymentService.verifyStatus(sessionId);
+  }
+
+  @Get('orders')
+  getOrders(@UserData() user: User) {
+    return this.paymentService.getOrders(user);
   }
 }

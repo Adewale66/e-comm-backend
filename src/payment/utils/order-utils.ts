@@ -76,8 +76,6 @@ export class OrderUtil {
       order.status = status;
 
       await this.orderRepository.save(order);
-
-      return order;
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went wrong',
@@ -86,23 +84,33 @@ export class OrderUtil {
     }
   }
 
+  formatCurrency(value: number) {
+    const formatted = value.toFixed(2);
+
+    return parseFloat(formatted).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
   generateOrderTable(order: Order) {
     const orderTotal = order.products.reduce(
       (sum, product) => sum + product.quantity * product.product.price,
       0,
     );
 
+    const grandTotal = this.formatCurrency(orderTotal);
+
     const tableBody = order.products
-      .map(
-        (product) =>
-          ` <tr>
-                <td style="border: 1px solid black; padding: 10px;">${product.product.id}</td>
+      .map((product, index) => {
+        return ` <tr style="text-align: center;">
+                <td style="border: 1px solid black; padding: 10px;">${index + 1}</td>
                 <td style="border: 1px solid black; padding: 10px;">${product.product.title}</td>
                 <td style="border: 1px solid black; padding: 10px;">${product.quantity}</td>
                 <td style="border: 1px solid black; padding: 10px;">${product.product.price}</td>
                 <td style="border: 1px solid black; padding: 10px;">${product.product.price * product.quantity}</td>
-          </tr>`,
-      )
+          </tr>`;
+      })
       .join('');
 
     const table = `
@@ -110,11 +118,11 @@ export class OrderUtil {
     <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
         <thead>
             <tr>
-                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Product Id</th>
+                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">#</th>
                 <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Product</th>
                 <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Quantity</th>
-                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Price</th>
-                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Total</th>
+                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Price (&#8358;)</th>
+                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Total (&#8358;)</th>
             </tr>
         </thead>
         <tbody>
@@ -123,7 +131,7 @@ export class OrderUtil {
         <tfoot>
             <tr>
                 <td colspan="4" style="text-align:right; border: 1px solid black; padding: 10px;"><strong>Grand Total</strong></td>
-                <td style="border: 1px solid black; padding: 10px;"><strong>${orderTotal}</strong></td>
+                <td style="border: 1px solid black; padding: 10px;"><strong>${grandTotal}</strong></td>
             </tr>
         </tfoot>
     </table>
