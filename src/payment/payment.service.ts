@@ -7,10 +7,11 @@ import {
   Logger,
   NotFoundException,
   RawBodyRequest,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { CartService } from 'src/cart/cart.service';
 import { ResponseService } from 'src/response.service';
 import { User } from 'src/users/entities/user.entity';
@@ -73,8 +74,8 @@ export class PaymentService {
           user_id: user.id,
         },
         mode: 'payment',
-        success_url: `${BASE_URL}/payment?session_id={CHECKOUT_SESSION_ID}&type=sucess`,
-        cancel_url: `${BASE_URL}/payment?session_id={CHECKOUT_SESSION_ID}&type=cancel`,
+        success_url: `${BASE_URL}/payments?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${BASE_URL}/cart`,
         payment_intent_data: {
           metadata: {
             order_id: order.id,
@@ -85,7 +86,7 @@ export class PaymentService {
       return new ResponseService(
         HttpStatus.CREATED,
         'Payment session created successfully',
-        { paymentURL: session.url },
+        { payment_url: session.url },
       );
     } catch (error) {
       Logger.error(error);
@@ -95,7 +96,7 @@ export class PaymentService {
     }
   }
 
-  async handleWebhook(req: RawBodyRequest<Request>, res: Response) {
+  async handleWebhook(req: RawBodyRequest<Request>) {
     const signature = req.headers['stripe-signature'];
     const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');
 
@@ -108,7 +109,8 @@ export class PaymentService {
         webhookSecret,
       );
     } catch (error) {
-      return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
+      Logger.log(error);
+      throw new UnauthorizedException();
     }
 
     await this.paymentQueue.add(
@@ -119,8 +121,6 @@ export class PaymentService {
         removeOnComplete: true,
       },
     );
-
-    return res.sendStatus(200);
   }
 
   async verifyStatus(sessionId: string) {
@@ -131,16 +131,9 @@ export class PaymentService {
         throw new NotFoundException(`Session with ID ${sessionId} not found.`);
       }
 
-      switch (session.payment_status) {
-        case 'paid':
-          return new ResponseService(HttpStatus.OK, 'Payment successful');
-
-        case 'unpaid':
-          throw new PaymentRequiredException();
-
-        default:
-          throw new BadRequestException('Payment status unknown');
-      }
+      if (session.payment_status === 'unpaid')
+        throw new PaymentRequiredException();
+      return new ResponseService(HttpStatus.OK, 'Success');
     } catch (error) {
       Logger.error(error);
       throw new InternalServerErrorException(

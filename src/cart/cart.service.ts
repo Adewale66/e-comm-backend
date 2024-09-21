@@ -10,7 +10,8 @@ import { ProductsService } from '../products/products.service';
 import { CartPayloadDto } from './dto/cartpayload.dto';
 import { CartItem } from './entities/cart-item.entity';
 import { Cart } from './entities/cart.entity';
-import { ResponseService } from 'src/response.service';
+import { CartResponse, ResponseService } from 'src/response.service';
+import { BulkDto } from './dto/bulk.dto';
 
 @Injectable()
 export class CartService {
@@ -19,7 +20,7 @@ export class CartService {
     private readonly productService: ProductsService,
   ) {}
 
-  async findOne(userId: string) {
+  async findCart(userId: string) {
     const cart = await this.getOrCreateCart(userId);
     const cartItems = cart.products.map((item) => {
       const { product, quantity } = item;
@@ -29,14 +30,43 @@ export class CartService {
         name: product.title,
         price: product.price,
         quantity,
+        subtotal: quantity * product.price,
       };
     });
+    const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
 
-    const data = {
-      products: cartItems,
-    };
+    return new CartResponse('Cart retrieved', total, cartItems);
+  }
 
-    return new ResponseService(HttpStatus.OK, 'Cart retrieved', data);
+  async addBulk(userId: string, bulkDto: BulkDto) {
+    const cart = await this.getOrCreateCart(userId);
+
+    for (const product of bulkDto.products) {
+      const cartItem = cart.products.find(
+        (cartItem) => cartItem.product.id === product.productId,
+      );
+
+      if (cartItem) {
+        cartItem.quantity += product.quantity;
+      } else {
+        const newCartItem = new CartItem();
+        newCartItem.cart = cart;
+
+        const productItem = await this.productService.findById(
+          product.productId,
+        );
+        if (!productItem) throw new NotFoundException('Product Not Found');
+
+        newCartItem.product = productItem;
+        newCartItem.quantity = product.quantity;
+
+        cart.products.push(newCartItem);
+      }
+    }
+
+    cart.total = this.computeTotalPrice(cart);
+    await this.cartRepository.save(cart);
+    return new ResponseService(HttpStatus.CREATED, 'Products added to cart');
   }
 
   async find(userId) {
@@ -54,24 +84,28 @@ export class CartService {
 
     if (!product) throw new NotFoundException('Product not found');
 
-    const containsProduct = cart.products.some(
+    const containsProduct = cart.products.find(
       (product) => product.product.id === cartPayload.productId,
     );
     if (containsProduct) {
-      throw new BadRequestException('Product already in cart');
+      return this.updateQuantity(
+        userId,
+        cartPayload.quantity + containsProduct.quantity,
+        cartPayload.productId,
+      );
     }
 
     const cartItem = new CartItem();
 
     cartItem.cart = cart;
-    cartItem.quantity = 1;
+    cartItem.quantity = cartPayload.quantity;
     cartItem.product = product;
     cart.products.push(cartItem);
     cart.total = this.computeTotalPrice(cart);
 
     await this.cartRepository.save(cart);
 
-    return new ResponseService(HttpStatus.CREATED, 'Added to cart');
+    return new ResponseService(HttpStatus.CREATED, 'Product added to cart');
   }
 
   async updateQuantity(userId: string, quanity: number, productId: string) {
@@ -145,7 +179,7 @@ export class CartService {
     });
 
     if (cart.products.length === 0) {
-      throw new NotFoundException('Cart is already empty.');
+      throw new BadRequestException('Cart is already empty.');
     }
 
     cart.products = [];

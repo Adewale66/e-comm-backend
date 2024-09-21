@@ -41,18 +41,14 @@ export class PaymentConsumer extends WorkerHost {
       case 'checkout.session.completed':
         const session = event.data.object;
 
-        const status = await this.paymentService.verifyStatus(session.id);
-
-        if (status.getStatus() === 200) {
+        if (session.payment_status === 'paid') {
           const metaData = session.metadata;
 
           const orderId = metaData.order_id;
           const user = metaData.user_id;
           await this.orderUtil.setOrderStatus(orderId, 'PAID');
 
-          const order = await this.orderUtil.findOne(orderId);
-
-          const orderTable = this.orderUtil.generateOrderTable(order);
+          const orderTable = await this.orderUtil.generateOrderTable(orderId);
 
           const customerData: CustomerData = {
             name: session.customer_details.name.split(' ')[0],
@@ -60,8 +56,8 @@ export class PaymentConsumer extends WorkerHost {
             orderTable,
           };
 
-          this.sendEmail(customerData);
           await this.orderUtil.clearCart(user);
+          await this.sendEmail(customerData);
         }
 
         break;

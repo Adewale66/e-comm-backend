@@ -22,6 +22,11 @@ export class Order {
   @Column()
   status: string;
 
+  @Column({
+    default: 'PAYMENT PENDING',
+  })
+  order_status: string;
+
   @ManyToOne(() => User, (user) => user.orders, { eager: true })
   user: User;
 

@@ -17,7 +17,7 @@ export class Cart {
 
   @Column('decimal', {
     default: 0.0,
-    precision: 5,
+    precision: 10,
     scale: 2,
   })
   total: number;

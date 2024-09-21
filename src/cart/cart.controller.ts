@@ -8,12 +8,14 @@ import {
   Param,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { CartService } from './cart.service';
 import { UserData } from 'src/decorators';
 import { CartPayloadDto } from './dto/cartpayload.dto';
 import { QuantityPayloadDto } from './dto/quantityPayload.dto';
+import { BulkDto } from './dto/bulk.dto';
 
 @Controller('cart')
 export class CartController {
@@ -21,7 +23,7 @@ export class CartController {
 
   @Get()
   findOne(@UserData() user: User) {
-    return this.cartService.findOne(user.id);
+    return this.cartService.findCart(user.id);
   }
 
   @Post('items')
@@ -29,7 +31,12 @@ export class CartController {
     return this.cartService.addToCart(user.id, cartPayload);
   }
 
-  @Patch('items/:id')
+  @Patch('items')
+  addBulk(@UserData() user: User, @Body() bulkDto: BulkDto) {
+    return this.cartService.addBulk(user.id, bulkDto);
+  }
+
+  @Put('items/:id')
   updateQuantity(
     @UserData() user: User,
     @Param('id') productId: string,
@@ -49,7 +56,7 @@ export class CartController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete('items')
+  @Delete()
   emptyCart(@UserData() user: User) {
     return this.cartService.emptyCart(user.id);
   }

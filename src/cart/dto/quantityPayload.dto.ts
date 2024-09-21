@@ -1,7 +1,6 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { CartPayloadDto } from './cartpayload.dto';
+import { OmitType } from '@nestjs/mapped-types';
 
-export class QuantityPayloadDto {
-  @IsNumber()
-  @IsNotEmpty()
-  quantity: number;
-}
+export class QuantityPayloadDto extends OmitType(CartPayloadDto, [
+  'productId',
+]) {}

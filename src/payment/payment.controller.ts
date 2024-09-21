@@ -1,16 +1,17 @@
 import {
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Query,
   RawBodyRequest,
   Req,
-  Res,
 } from '@nestjs/common';
 import { Public, UserData } from 'src/decorators';
 import { User } from 'src/users/entities/user.entity';
 import { PaymentService } from './payment.service';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 
 @Controller()
 export class PaymentController {
@@ -26,9 +27,10 @@ export class PaymentController {
   }
 
   @Public()
+  @HttpCode(HttpStatus.OK)
   @Post('payment/webhook')
-  handleWebhook(@Req() req: RawBodyRequest<Request>, @Res() res: Response) {
-    return this.paymentService.handleWebhook(req, res);
+  handleWebhook(@Req() req: RawBodyRequest<Request>) {
+    return this.paymentService.handleWebhook(req);
   }
 
   @Get('payment/stripe/status')

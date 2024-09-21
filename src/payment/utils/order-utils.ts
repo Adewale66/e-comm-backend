@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,17 +52,8 @@ export class OrderUtil {
     return order;
   }
 
-  async findOne(orderId: string) {
-    return await this.orderRepository.findOne({
-      where: {
-        id: orderId,
-      },
-      relations: ['products', 'products.product'],
-    });
-  }
-
   async findAll(userId: string) {
-    return await this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       where: {
         user: {
           id: userId,
@@ -69,6 +61,32 @@ export class OrderUtil {
       },
       relations: ['products', 'products.product'],
     });
+    const sort = orders.map((order) => {
+      return {
+        order_number: order.order_number,
+        status: order.status,
+        order_status: order.order_status,
+        created_at: order.created_at,
+        products: order.products.map((product) => {
+          return {
+            productId: product.product.id,
+            name: product.product.title,
+            price: product.product.price,
+            quantity: product.quantity,
+            image: product.product.image,
+            subtotal: product.product.price * product.quantity,
+          };
+        }),
+        total: order.products.reduce(
+          (sum, product) => sum + product.quantity * product.product.price,
+          0,
+        ),
+      };
+    });
+    sort.sort((a, b) => {
+      return b.created_at.getTime() - a.created_at.getTime();
+    });
+    return sort;
   }
 
   async clearCart(userId: string) {
@@ -77,18 +95,21 @@ export class OrderUtil {
 
   async setOrderStatus(orderId: string, status: string) {
     try {
-      const order = await this.findOne(orderId);
+      const order = await this.orderRepository.findOne({
+        where: {
+          id: orderId,
+        },
+      });
 
       if (!order) throw new NotFoundException('Order not found');
 
       order.status = status;
+      if (status == 'PAID') order.order_status = 'IN TRANSIT';
 
       await this.orderRepository.save(order);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Something went wrong',
-        error.message,
-      );
+      Logger.log(error);
+      throw new InternalServerErrorException('An error occurred');
     }
   }
 
@@ -101,7 +122,16 @@ export class OrderUtil {
     });
   }
 
-  generateOrderTable(order: Order) {
+  async generateOrderTable(orderId) {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: orderId,
+      },
+      relations: ['products', 'products.product'],
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+
     const orderTotal = order.products.reduce(
       (sum, product) => sum + product.quantity * product.product.price,
       0,
@@ -129,8 +159,8 @@ export class OrderUtil {
                 <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">#</th>
                 <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Product</th>
                 <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Quantity</th>
-                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Price (&#8358;)</th>
-                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Total (&#8358;)</th>
+                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Price($)</th>
+                <th style="border: 1px solid black; padding: 10px; background-color: #f2f2f2;">Total($)</th>
             </tr>
         </thead>
         <tbody>
@@ -139,7 +169,7 @@ export class OrderUtil {
         <tfoot>
             <tr>
                 <td colspan="4" style="text-align:right; border: 1px solid black; padding: 10px;"><strong>Grand Total</strong></td>
-                <td style="border: 1px solid black; padding: 10px;"><strong>${grandTotal}</strong></td>
+                <td style="border: 1px solid black; padding: 10px;"><strong>$${grandTotal}</strong></td>
             </tr>
         </tfoot>
     </table>
