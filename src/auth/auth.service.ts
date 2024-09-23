@@ -88,6 +88,7 @@ export class AuthService {
       'reset',
       {
         email: resetPassword.email,
+        name: userExists.firstName,
         code,
       },
       {
