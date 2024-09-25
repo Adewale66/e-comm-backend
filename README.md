@@ -3,16 +3,16 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://e-comm-frontend-xi.vercel.app/">
     <img src="assets/Logo-vector.png" alt="Logo" width="600" height="250">
-  </a>
 
-  <h3 align="center">ACME Ecommerce</h3>
+
+  <h2 align="center">ACME Ecommerce</h2>
 
   <p align="center">
     An e-commerce website.
     <br />
     <a href="https://www.youtube.com/watch?v=yCXuyqVTIFU">View Demo</a>
+    <a href="https://e-comm-frontend-xi.vercel.app/>Visit website</a>
   </p>
 </div>
 
@@ -42,7 +42,7 @@
 
 ## About The Project
 
-Our ecommerce app provides a seamless shopping experience, allowing users to browse products, add items to their cart, and securely complete purchases with Stripe. Built with robust backend management using NestJS and PostgreSQL, it ensures efficient cart and order handling, user authentication, and smooth checkout processes.
+Our e-commerce app provides a seamless shopping experience, allowing users to browse a variety of products, add items to their cart, and securely complete purchases with Stripe payment integration. Built with robust backend management using NestJS and PostgreSQL and redis, it ensures efficient cart and order handling, user authentication, and smooth checkout processes.
 
 ### Built With
 
