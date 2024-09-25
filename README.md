@@ -12,7 +12,7 @@
     An e-commerce website.
     <br />
     <a href="https://www.youtube.com/watch?v=yCXuyqVTIFU">View Demo</a>
-    <a href="https://e-comm-frontend-xi.vercel.app/>Visit website</a>
+    <a href="https://e-comm-frontend-xi.vercel.app/">Visit website</a>
   </p>
 </div>
 
