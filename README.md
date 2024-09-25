@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://e-comm-frontend-xi.vercel.app/">
-    <img src="assets/Logo-vector.png" alt="Logo" width="500" height="250">
+    <img src="assets/Logo-vector.png" alt="Logo" width="600" height="250">
   </a>
 
   <h3 align="center">ACME Ecommerce</h3>
