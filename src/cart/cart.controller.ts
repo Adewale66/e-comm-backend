@@ -16,7 +16,9 @@ import { UserData } from 'src/decorators';
 import { CartPayloadDto } from './dto/cartpayload.dto';
 import { QuantityPayloadDto } from './dto/quantityPayload.dto';
 import { BulkDto } from './dto/bulk.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('cart')
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
