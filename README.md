@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://e-comm-frontend-xi.vercel.app/">
-    <img src="assets/Logo.png" alt="Logo" width="80" height="80">
+    <img src="assets/Logo.png" alt="Logo" width="250" height="250">
   </a>
 
   <h3 align="center">ACME Ecommerce</h3>
@@ -41,8 +41,6 @@
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
-
-![App Logo](assets/Logo.png)
 
 Our ecommerce app provides a seamless shopping experience, allowing users to browse products, add items to their cart, and securely complete purchases with Stripe. Built with robust backend management using NestJS and PostgreSQL, it ensures efficient cart and order handling, user authentication, and smooth checkout processes.
 
@@ -136,4 +134,3 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [Adewale Kujore](https://github.com/Adewale66)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-```
