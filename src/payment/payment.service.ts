@@ -104,7 +104,7 @@ export class PaymentService {
 
     try {
       event = this.stripe.webhooks.constructEvent(
-        req.rawBody,
+        req.body,
         signature,
         webhookSecret,
       );
