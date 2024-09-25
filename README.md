@@ -7,7 +7,7 @@
     <img src="assets/Logo-vector.png" alt="Logo" width="600" height="250">
   </a>
 
-  <h3 align="center">ACME Ecommerce</h3>
+  <h3 align="center"><font size="6">ACME Ecommerce </font></h3>
 
   <p align="center">
     An e-commerce website.
