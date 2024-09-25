@@ -3,8 +3,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
+  <a href="#">
     <img src="assets/Logo-vector.png" alt="Logo" width="600" height="250">
-
+  </a>
 
   <h2 align="center">ACME Ecommerce</h2>
 
