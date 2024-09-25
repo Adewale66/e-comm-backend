@@ -7,10 +7,10 @@
     <img src="assets/Logo-vector.png" alt="Logo" width="600" height="250">
   </a>
 
-  <h3 align="center"><font size="6">ACME Ecommerce </font></h3>
+
 
   <p align="center">
-    An e-commerce website.
+    Experience the application:
     <br />
     <a href="https://www.youtube.com/watch?v=yCXuyqVTIFU">View Demo</a>
     <span>&nbsp; &nbsp; </span>
