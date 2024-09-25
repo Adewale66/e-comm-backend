@@ -32,7 +32,7 @@ import { PaymentModule } from './payment/payment.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         connection: {
-          host: configService.get('REDIS_HOST'),
+          path: configService.get('REDIS_URL'),
         },
       }),
       inject: [ConfigService],
