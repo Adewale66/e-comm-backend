@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
@@ -13,22 +13,29 @@ import { PaymentModule } from './payment/payment.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      username: 'postgres',
-      password: 'password',
-      database: 'postgres',
-      synchronize: true,
-      autoLoadEntities: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST'),
+        username: configService.get('DB_USER'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DATABASE'),
+        synchronize: true,
+        autoLoadEntities: true,
+      }),
+      inject: [ConfigService],
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST'),
+        },
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,

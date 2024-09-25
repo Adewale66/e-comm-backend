@@ -1,7 +1,3 @@
-
-
-
-
 <a name="readme-top"></a>
 
 <!-- PROJECT LOGO -->
@@ -92,7 +88,7 @@ _To run the web application run the following commands._
 
    ```
 
-4. Run application (Dev)
+4. Run application
 
    ```sh
    npm run start:dev
