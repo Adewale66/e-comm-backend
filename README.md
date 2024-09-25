@@ -135,4 +135,8 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [Eddy Ukpong](https://github.com/Fahleh) \
 [Adewale Kujore](https://github.com/Adewale66)
 
+## Acknowledgements
+
+- This project uses the [Fake Store API](https://fakestoreapi.com/) to generate fake items for demonstration purposes. Many thanks to the creators of this API.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
