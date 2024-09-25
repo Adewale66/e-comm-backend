@@ -1,4 +1,4 @@
-import { Order } from 'src/payment/entities/order.entity';
+import { Order } from '../../payment/entities/order.entity';
 import {
   Column,
   CreateDateColumn,

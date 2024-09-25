@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
 import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
 import { LoginDto } from 'src/auth/dto/login.dto';
-import { ResponseService } from 'src/response.service';
+import { ResponseService } from '../response.service';
 import { Repository } from 'typeorm';
 import { RegisterDto } from '../auth/dto/create-auth.dto';
 import { User } from './entities/user.entity';

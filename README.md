@@ -1,85 +1,139 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+<a name="readme-top"></a>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://e-comm-frontend-xi.vercel.app/">
+    <img src="assets/Logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+  <h3 align="center">ACME Ecommerce</h3>
 
-## Description
+  <p align="center">
+    An e-commerce website.
+    <br />
+    <a href="https://www.youtube.com/watch?v=yCXuyqVTIFU">View Demo</a>
+  </p>
+</div>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#author">Authors</a></li>
+  </ol>
+</details>
 
-## Project setup
+<!-- ABOUT THE PROJECT -->
+
+## About The Project
+
+![App Logo](assets/Logo.png)
+
+Our ecommerce app provides a seamless shopping experience, allowing users to browse products, add items to their cart, and securely complete purchases with Stripe. Built with robust backend management using NestJS and PostgreSQL, it ensures efficient cart and order handling, user authentication, and smooth checkout processes.
+
+### Built With
+
+- Frontend
+  - [Next.js](https://nextjs.org/)
+  - [Tailwind CSS](https://tailwindcss.com/)
+  - [TypeScript](https://www.typescriptlang.org/)
+  - [Shadcn UI](https://ui.shadcn.com/)
+  - [Redux Toolkit](https://redux-toolkit.js.org/)
+- Backend
+  - [Nestjs](https://docs.nestjs.com/)
+  - [TypeScript](https://www.typescriptlang.org/)
+  - [Typeorm](https://typeorm.io/)
+  - [PostgreSQL](https://www.postgresql.org/)
+  - [Redis](https://redis.io/)
+
+<!-- GETTING STARTED -->
+
+## Getting Started
+
+### Prerequisites
+
+To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer.
+
+### Installation
+
+_To run the web application run the following commands._
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/Adewale66/e-comm-backend.git
+   ```
+2. Install NPM packages
+   ```sh
+   npm install
+   ```
+3. Create env file
+
+   ```sh
+   cat .env.example > .env
+
+   ```
+
+4. Run application (Dev)
+
+   ```sh
+   npm run start:dev
+
+   ```
+
+   <!-- USAGE EXAMPLES -->
+
+## Usage
+
+### example
+
+To add a product to your cart, use the following endpoint:
 
 ```bash
-$ npm install
+POST /api/v1/cart/items
+{
+  "productId": 123,
+  "quantity": 2
+}
+
 ```
 
-## Compile and run the project
+To update the quantity of a product in cart, use the following endpoint:
 
 ```bash
-# development
-$ npm run start
+PUT /api/v1/cart/items/:productId
+{
+  "quantity": 2
+}
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+<!-- LICENSE -->
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<!-- Authors -->
+
+## Authors
+
+[Eddy Ukpong](https://github.com/Fahleh) \
+[Adewale Kujore](https://github.com/Adewale66)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+```
