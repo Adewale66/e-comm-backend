@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as argon2 from 'argon2';
 import { Queue } from 'bullmq';
 import { generate } from 'otp-generator';
-import { ResponseService } from 'src/response.service';
+import { ResponseService } from '../response.service';
 import { Repository } from 'typeorm';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/create-auth.dto';
